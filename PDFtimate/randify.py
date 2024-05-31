@@ -1,6 +1,6 @@
 from .RandomVariable import RandomVariable
 
-N_default = 10000
+N_default = 100000
 
 
 def randify(foo, N=-1):

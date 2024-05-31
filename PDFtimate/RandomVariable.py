@@ -29,14 +29,14 @@ class RandomVariable:
             )
 
         # determine type
-        if self.mode == "generator":
+        if self.mode == "sample":
+            self.example_sample = self.samples[0]
+        elif self.mode == "generator":
             # calculate one sample to determine type
             self.example_sample = self.generator(*self.generator_args, **self.generator_kwargs)
-            self.type_ = type(self.example_sample).__name__
-        else:
-            self.type_ = type(self.samples[0]).__name__
+        self.type_ = type(self.example_sample).__name__
 
-    def sample(self, N):
+    def sample(self, N: int):
         """
         Generate N samples of the random variable.
         """
@@ -46,21 +46,29 @@ class RandomVariable:
             ]
             self.mode = "sample"
 
-    def expected_value(self, property=None):
+    def __call__(self, property: str = None):
+        """
+        Returns whole object or single property as random variables.
+        """
+        if property is None:
+            return self
+        else:
+            return RandomVariable(samples=[getattr(sample, property) for sample in self.samples])
+
+    def expected_value(self, property: str = None):
         """
         Returns expected value of the random variable or the expected value of a property of the random variable.
+        Class of randomized object must implement __add__ and __truediv__ methods.
         """
         if property is None:
             return sum(self.samples) / len(self.samples)
         else:
             return sum([getattr(sample, property) for sample in self.samples]) / len(self.samples)
 
-    def __call__(self, property=None):
-        return self.expected_value(property)
-
-    def variance(self, property=None):
+    def variance(self, property: str = None):
         """
         Returns variance of the random variable or the variance of a property of the random variable.
+        Class of randomized object must implement __add__ and __truediv__ methods.
         """
         expected_value = self.expected_value(property)
         if property is None:

@@ -1,0 +1,54 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools >= 61.0", "wheel"]
+
+[project]
+name = "PDFtimate"
+requires-python = ">=3.8"
+version = "0.1.0"
+authors = [{name = "Jonas Nebl", email = "jonas.nebl@tum.de"}]
+license = {file = "LICENSE.md"}
+description = "Simple probability density function estimation for existing code"
+keywords = ["montecarlo", "random"]
+
+dependencies = []
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[tool.setuptools]
+packages = [
+    "PDFtimate"
+]
+include-package-data = false
+
+[tool.ruff]
+target-version = "py37"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    # "ANN", # annotations
+    "B", # bugbear
+    "C", # comprehensions
+    "E", # style errors
+    "F", # flakes
+    "I", # import sorting
+    "RUF", # ruff specific rules
+    "UP", # upgrade
+    "W", # style warnings
+    "YTT", # sys.version
+    "ISC002",
+    "NPY201"
+]
+
+ignore = [
+  "C901", # Comprehension is too complex (11 > 10)
+  "N802", # Function name should be lowercase
+  "N806", # Variable in function should be lowercase
+  "E501", # Line too long ({width} > {limit} characters)
+  "B904", # raise ... from err
+  "B905", # zip() without an explicit strict= parameter
+  "RUF005", # recommends non-type-aware expansion
+]

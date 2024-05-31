@@ -44,7 +44,6 @@ class RandomVariable:
             self.samples = [
                 self.generator(*self.generator_args, **self.generator_kwargs) for _ in range(N)
             ]
-            self.mode = "sample"
 
     def __call__(self, property: str = None):
         """

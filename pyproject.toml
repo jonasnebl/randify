@@ -16,10 +16,6 @@ dependencies = [
   "matplotlib"
 ]
 
-test = [
-    "pytest"
-]
-
 [tool.pytest.ini_options]
 testpaths = "tests"
 

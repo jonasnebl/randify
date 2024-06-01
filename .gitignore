@@ -5,3 +5,4 @@ venv/
 .ruff_cache/
 *.egg-info/
 requirements.txt
+dist/

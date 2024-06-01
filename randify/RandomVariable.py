@@ -68,7 +68,7 @@ class RandomVariable:
 
     def expected_value(self):
         """
-        Calculates expected value $\mu = E[X]$ of the random variable or the expected value of a property of the random variable.
+        Calculates expected value $\mu = E[X]$ of the random variable.
         Class of randomized object must implement __add__ and __truediv__ methods.
         :return: Expected value $\mu$
         """
@@ -76,7 +76,7 @@ class RandomVariable:
 
     def variance(self):
         """
-        Calculates variance $\sigma^2 = E[(X - \mu)^2]$ of the random variable or the variance of a property of the random variable.
+        Calculates variance $\sigma^2 = E[(X - \mu)^2]$ of the random variable.
         Class of randomized object must implement __add__ and __truediv__ methods.
         :return: Variance $\sigma^2$
         """
@@ -88,7 +88,7 @@ class RandomVariable:
     def skewness(self):
         """
         Calculates skewness $\gamma = E \left[ \left( \\frac{X -\mu}{\sigma} \\right)^3 \\right]$
-        of the random variable or the skewness of a property of the random variable.
+        of the random variable.
         Class of randomized object must implement __add__ and __truediv__ methods.
         :return: Skewness $\gamma$
         """
@@ -103,7 +103,7 @@ class RandomVariable:
     def kurtosis(self):
         """
         Calculates kurtosis $\\beta = E \left[ \left( \\frac{X -\mu}{\sigma} \\right)^4 \\right]$
-        of the random variable or the kurtosis of a property of the random variable.
+        of the random variable.
         Class of randomized object must implement __add__ and __truediv__ methods.
         :return: Kurtosis $\\beta$
         """

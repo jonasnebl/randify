@@ -1,4 +1,4 @@
-<img src="logo.png" width="300">
+# Randify
 
 Evaluate how your code reacts to randomly distributed inputs.
 Define inputs as random variables and perform Monte Carlo simulations to estimate probability density distributions (PDF) of your outputs. Designed for simple syntax.
@@ -43,14 +43,13 @@ y1, y2 = f(x1, x2)
 from randify import plotPDF
 plotPDF(x1=x1, x2=x2, y1=y1, y2=y2)
 ```
-![plotPDF_example](plotPDF_example.png)
 
 ## Documentation
 
 Use `pdoc` to automatically generate html documentation.
 ```
 $ pip install pdoc
-$ pdoc randify --math --logo logo.png
+$ pdoc randify --math
 ```
 
 ## Formatting 

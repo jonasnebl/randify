@@ -18,8 +18,7 @@ def plotPDF(**kwargs):
     N_subplots = len(kwargs)
     subplots_rows = int(np.sqrt(N_subplots))
     subplots_cols = int(np.ceil(N_subplots / subplots_rows))
-    counter_rows = 0
-    counter_cols = 0
+    counter_rows, counter_cols = 0, 0
 
     N_bins = 50
 
@@ -89,7 +88,8 @@ def plotPDF(**kwargs):
 
             else:
                 raise ValueError(
-                    "plotPDF() takes only one or a tuple of two RandomVariable objects."
+                    "plotPDF() takes only one RandomVariable or tuples"
+                    "of two RandomVariable objects as arguments."
                 )
 
         if counter_cols == subplots_cols - 1:

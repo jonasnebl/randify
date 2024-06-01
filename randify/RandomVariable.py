@@ -59,6 +59,7 @@ class RandomVariable:
         """
         Returns whole object or single property as random variables.
         :param property: optional, Property to extract from the random variable.
+        :return: RandomVariable object representing the whole object or a single property.
         """
         if property is None:
             return self
@@ -67,15 +68,17 @@ class RandomVariable:
 
     def expected_value(self):
         """
-        Returns expected value of the random variable or the expected value of a property of the random variable.
+        Calculates expected value $\mu = E[X]$ of the random variable or the expected value of a property of the random variable.
         Class of randomized object must implement __add__ and __truediv__ methods.
+        :return: Expected value $\mu$
         """
         return sum(self.samples) / len(self.samples)
 
     def variance(self):
         """
-        Returns variance of the random variable or the variance of a property of the random variable.
+        Calculates variance $\sigma^2 = E[(X - \mu)^2]$ of the random variable or the variance of a property of the random variable.
         Class of randomized object must implement __add__ and __truediv__ methods.
+        :return: Variance $\sigma^2$
         """
         expected_value = self.expected_value()
         return sum([(sample - expected_value) ** 2 for sample in self.samples]) / (
@@ -84,8 +87,10 @@ class RandomVariable:
 
     def skewness(self):
         """
-        Returns skewness of the random variable or the skewness of a property of the random variable.
+        Calculates skewness $\gamma = E \left[ \left( \\frac{X -\mu}{\sigma} \\right)^3 \\right]$
+        of the random variable or the skewness of a property of the random variable.
         Class of randomized object must implement __add__ and __truediv__ methods.
+        :return: Skewness $\gamma$
         """
         expected_value = self.expected_value()
         variance = self.variance()
@@ -97,8 +102,10 @@ class RandomVariable:
 
     def kurtosis(self):
         """
-        Returns kurtosis of the random variable or the kurtosis of a property of the random variable.
+        Calculates kurtosis $\\beta = E \left[ \left( \\frac{X -\mu}{\sigma} \\right)^4 \\right]$
+        of the random variable or the kurtosis of a property of the random variable.
         Class of randomized object must implement __add__ and __truediv__ methods.
+        :return: Kurtosis $\\beta$
         """
         expected_value = self.expected_value()
         variance = self.variance()
@@ -114,9 +121,10 @@ class RandomVariable:
             )
         )
 
-    def __str__(self) -> str:
+    def __str__(self):
         """
         Return a string representation of the random variable for printing.
+        :return: String representation of the random variable.
         """
         string = f"<RandomVariable of type {self.type_}"
         if self.mode == "generator":
@@ -125,5 +133,5 @@ class RandomVariable:
             string += f" with custom distribution"
         return string
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return self.__str__()

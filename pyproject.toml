@@ -3,7 +3,7 @@ build-backend = "setuptools.build_meta"
 requires = ["setuptools >= 61.0", "wheel"]
 
 [project]
-name = "PDFtimate"
+name = "randify"
 requires-python = ">=3.8"
 version = "0.1.0"
 authors = [{name = "Jonas Nebl", email = "jonas.nebl@tum.de"}]
@@ -29,7 +29,7 @@ content-type = "text/markdown"
 
 [tool.setuptools]
 packages = [
-    "PDFtimate"
+    "randify"
 ]
 include-package-data = false
 
@@ -40,6 +40,7 @@ line-length = 100
 [tool.ruff.lint]
 select = [
     "B", # flake8-bugbear
+    "W292", # empty line at end of file
 ]
 
 ignore = [

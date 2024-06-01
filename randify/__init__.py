@@ -1,3 +1,7 @@
+"""
+.. include:: ../README.md
+"""
+
 from .randify import randify
 from .RandomVariable import RandomVariable
 from .plotPDF import plotPDF

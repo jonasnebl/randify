@@ -1,4 +1,4 @@
-from PDFtimate import randify, RandomVariable, plotPDF
+from randify import randify, RandomVariable, plotPDF
 import numpy as np
 
 

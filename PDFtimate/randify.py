@@ -2,7 +2,7 @@ from .RandomVariable import RandomVariable
 from time import perf_counter
 
 
-def randify(foo, N=-1, duration=1):
+def randify(foo, N=-1, duration=2):
     """
     Decorator that takes a function foo and allows RandomVariables as input.
     Performs Monte Carlo simulation by evaluating foo on samples of the input RandomVariables.

@@ -39,26 +39,14 @@ line-length = 100
 
 [tool.ruff.lint]
 select = [
-    # "ANN", # annotations
-    "B", # bugbear
-    "C", # comprehensions
-    "E", # style errors
-    "F", # flakes
-    "I", # import sorting
-    "RUF", # ruff specific rules
-    "UP", # upgrade
-    "W", # style warnings
-    "YTT", # sys.version
-    "ISC002",
-    "NPY201"
+    "B", # flake8-bugbear
 ]
 
 ignore = [
-  "C901", # Comprehension is too complex (11 > 10)
-  "N802", # Function name should be lowercase
-  "N806", # Variable in function should be lowercase
-  "E501", # Line too long ({width} > {limit} characters)
-  "B904", # raise ... from err
-  "B905", # zip() without an explicit strict= parameter
-  "RUF005", # recommends non-type-aware expansion
 ]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"

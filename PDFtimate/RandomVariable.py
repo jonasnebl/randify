@@ -3,7 +3,8 @@ class RandomVariable:
     Class extending an arbitrary python object to a random variable.
     A random variable can be in one of two modes:
     1. Sample mode: typically used for inferred random variables
-    2. Generator mode: typically used for explicitly defined random variables
+    2. Generator mode: typically used for known distributions.
+        Samples can be generated from a saved generator function.
     """
 
     def __init__(self, *args, **kwargs):
@@ -39,45 +40,46 @@ class RandomVariable:
     def sample(self, N: int):
         """
         Generate N samples of the random variable.
+        :param N: Number of samples to generate. Overwrites existing samples.
         """
         if self.mode == "generator":
-            self.samples = [
-                self.generator(*self.generator_args, **self.generator_kwargs) for _ in range(N)
-            ]
+            try:  # E.g. numpy distributions allow a size argument, faster than list comprehension
+                self.samples = list(
+                    self.generator(*self.generator_args, **self.generator_kwargs, size=N)
+                )
+                assert len(self.samples) == N
+                assert isinstance(self.samples[0], type(self.example_sample))
+            except:
+                self.samples = [
+                    self.generator(*self.generator_args, **self.generator_kwargs) for _ in range(N)
+                ]
 
     def __call__(self, property: str = None):
         """
         Returns whole object or single property as random variables.
+        :param property: optional, Property to extract from the random variable.
         """
         if property is None:
             return self
         else:
             return RandomVariable(samples=[getattr(sample, property) for sample in self.samples])
 
-    def expected_value(self, property: str = None):
+    def expected_value(self):
         """
         Returns expected value of the random variable or the expected value of a property of the random variable.
         Class of randomized object must implement __add__ and __truediv__ methods.
         """
-        if property is None:
-            return sum(self.samples) / len(self.samples)
-        else:
-            return sum([getattr(sample, property) for sample in self.samples]) / len(self.samples)
+        return sum(self.samples) / len(self.samples)
 
-    def variance(self, property: str = None):
+    def variance(self):
         """
         Returns variance of the random variable or the variance of a property of the random variable.
         Class of randomized object must implement __add__ and __truediv__ methods.
         """
-        expected_value = self.expected_value(property)
-        if property is None:
-            return sum([(sample - expected_value) ** 2 for sample in self.samples]) / (
-                len(self.samples) - 1
-            )
-        else:
-            return sum(
-                [(getattr(sample, property) - expected_value) ** 2 for sample in self.samples]
-            ) / (len(self.samples) - 1)
+        expected_value = self.expected_value()
+        return sum([(sample - expected_value) ** 2 for sample in self.samples]) / (
+            len(self.samples) - 1
+        )
 
     def __str__(self) -> str:
         """

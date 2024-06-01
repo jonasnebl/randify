@@ -6,10 +6,13 @@ import numpy as np
 def plotPDF(**kwargs):
     """
     Plot the probability density function of one or two RandomVariable objects.
-    :param args: RandomVariable to be plotted.
+    :param kwargs: RandomVariable to be plotted.
         Either pass one arg for 1D plot or a tuple of two variables for 2D plot:
-        plotPDF(x1, (x2, x3)) will make two plots, one 1D plot for x1 and one 2D plot for x2 and x3.
-        Pass as keyword arguments for nice plot labels.
+        Use the keyword to set the title for the plot.
+        Example:
+        plotPDF(x1=x1,
+                x2_x2=(x2, x3))
+        This will make two subplots, one 1D plot for x1 and one 2D plot for x2 and x3.
     """
 
     N_subplots = len(kwargs)
@@ -23,6 +26,11 @@ def plotPDF(**kwargs):
     fig, axs = plt.subplots(
         subplots_rows, subplots_cols, figsize=(5 * subplots_cols, 5 * subplots_rows)
     )
+    if subplots_rows == 1:
+        axs = [axs]
+    if subplots_cols == 1:
+        axs = [axs]
+
     fig.suptitle("Probability Density Function")
 
     for i in range(subplots_rows * subplots_cols):

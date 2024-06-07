@@ -1,0 +1,135 @@
+from .RandomVariable import RandomVariable
+import matplotlib.pyplot as plt
+import numpy as np
+
+# TODO: Remove histogram usages and use built-in PDF functions from RandomVariable
+
+
+def _x_value_helper_for_histogram(bin_edges):
+    """
+    Helper function to extend bin_edges with zeros for plotting vertical lines.
+    Also calculates the x values for the bin centers instead of the bin edges.
+    :param bin_edges: Bin edges from np.histogram or np.histogram2d.
+    :return: Bin centers.
+    """
+    bin_edges_extended = np.concatenate(
+        (
+            bin_edges[[0]] - 1e-3 * (np.max(bin_edges) - np.min(bin_edges)),
+            bin_edges,
+            bin_edges[[-1]] + 1e-3 * (np.max(bin_edges) - np.min(bin_edges)),
+        )
+    )
+    return 0.5 * (bin_edges_extended[:-1] + bin_edges_extended[1:])
+
+
+def plot_decorator(foo):
+    """
+    Decorator for plotting multiple RandomVariables in one matplotlib figure.
+    :param foo: Function that plots the probability density function of one RandomVariable.
+    :return: Function that plots the probability density function of multiple RandomVariables.
+    """
+
+    def inner(*args, **kwargs):
+        N_subplots = len(kwargs)
+        subplots_rows = int(np.sqrt(N_subplots))
+        subplots_cols = int(np.ceil(N_subplots / subplots_rows))
+        counter_rows, counter_cols = 0, 0
+
+        fig, axs = plt.subplots(
+            subplots_rows, subplots_cols, figsize=(5 * subplots_cols, 5 * subplots_rows)
+        )
+        if subplots_rows == 1:
+            axs = [axs]
+        if subplots_cols == 1:
+            axs = [axs]
+
+        for i in range(subplots_rows * subplots_cols):
+            if i >= N_subplots:
+                axs[counter_rows][counter_cols].remove()
+            else:
+                ranvar_name, ranvar = list(kwargs.items())[i]
+
+                ax = axs[counter_rows][counter_cols]
+
+                title = foo(ax, ranvar, ranvar_name)
+
+            if counter_cols == subplots_cols - 1:
+                counter_rows += 1
+                counter_cols = 0
+            else:
+                counter_cols += 1
+
+        fig.suptitle(title, fontsize=16)
+
+        plt.tight_layout()
+        plt.show()
+
+    return inner
+
+
+@plot_decorator
+def plot_pdf(ax, ranvar, ranvar_name, plot_expected_value: bool = True):
+    """
+    Plot the 1D probability density function of one RandomVariable object.
+    :param plot_expected_value: If True, the expected value is plotted as a vertical line.
+    :param kwargs: RandomVariable to be plotted.
+        Use the keyword to set the title for the plot.
+        Example:
+        plotPDF(x1=x1, 2=x2)
+        This will make two subplots, one 1D plot for x1 and one plot for x2.
+    """
+    x_values = np.linspace(np.min(ranvar.samples), np.max(ranvar.samples), 100)
+    pdf_values = ranvar.pdf(x_values)
+
+    ax.plot(x_values, pdf_values, label="$p(x)$")
+    ax.fill_between(x_values, pdf_values, alpha=0.1)
+    ax.set_xlabel("$x$")
+    ax.set_ylabel("$p(x)$")
+    ax.set_title(ranvar_name)
+    ax.set_ylim(0, np.max(pdf_values) * 1.2)
+
+    if plot_expected_value:
+        ax.axvline(ranvar.expected_value, color="red", label="Expected value")
+        ax.text(
+            ranvar.expected_value,
+            0.98 * ax.get_ylim()[1],
+            f" E[{ranvar_name}]",
+            color="red",
+            verticalalignment="top",
+        )
+
+    return "Probability density function"
+
+
+@plot_decorator
+def plot_cdf(ax, ranvar, ranvar_name, plot_expected_value: bool = True):
+    """
+    Plot the 1D cumulative distribution function of one RandomVariable object.
+    :param plot_expected_value: If True, the expected value is plotted as a vertical line.
+    :param kwargs: RandomVariable to be plotted.
+        Use the keyword to set the title for the plot.
+        Example:
+        plotPDF(x1=x1, 2=x2)
+        This will make two subplots, one 1D plot for x1 and one plot for x2.
+    """
+    x_values = np.linspace(np.min(ranvar.samples), np.max(ranvar.samples), 100)
+    cdf_values = ranvar.cdf(x_values)
+
+    ax.plot(x_values, cdf_values, label="$p(x)$")
+    ax.fill_between(x_values, cdf_values, alpha=0.1)
+    ax.set_xlabel("$x$")
+    ax.set_ylabel("$F(x)$")
+    ax.set_title(ranvar_name)
+    ax.set_ylim(0, 1.2)
+
+    if plot_expected_value:
+        ax.axvline(ranvar.expected_value, color="red", label="Expected value")
+        ax.text(
+            ranvar.expected_value,
+            0.98 * ax.get_ylim()[1],
+            f" E[{ranvar_name}]",
+            color="red",
+            verticalalignment="top",
+        )
+
+    return "Cumulative distribution function"

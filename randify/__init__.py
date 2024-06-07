@@ -4,6 +4,6 @@
 
 from .randify import randify
 from .RandomVariable import RandomVariable
-from .plotPDF import plotPDF
+from .plot import plot_pdf, plot_cdf
 
-__all__ = ["randify", "RandomVariable", "plotPDF"]
+__all__ = ["randify", "RandomVariable", "plot_pdf", "plot_cdf"]

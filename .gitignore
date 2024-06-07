@@ -6,3 +6,4 @@ venv/
 *.egg-info/
 requirements.txt
 dist/
+doc/

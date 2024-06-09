@@ -1,5 +1,6 @@
 from functools import cached_property
 import numpy as np
+from .utils import *
 
 
 class RandomVariable:
@@ -13,6 +14,8 @@ class RandomVariable:
     """
 
     def __init__(self, *args, **kwargs):
+        self.N_samples_default = 1000
+
         # parse input and check whether samples or generator_func are used for initialization
         if args and isinstance(args[0], list):
             self.samples = args[0]
@@ -32,7 +35,7 @@ class RandomVariable:
             )
 
         # determine type
-        if hasattr(self, "samples"):
+        if "samples" in self.__dict__:  # avoid hasattr to not trigger cached_property
             self.example_sample = self.samples[0]
         elif hasattr(self, "generator_func"):
             self.example_sample = self.generator_func(*self.generator_args, **self.generator_kwargs)
@@ -46,10 +49,19 @@ class RandomVariable:
         """
         if property_ is None:
             return self
+        elif not hasattr(self.example_sample, property_):
+            raise ValueError(f"Property {property_} not available.")
+        elif hasattr(self, "generator_func"):
+            if callable(getattr(self.example_sample, property_)):
+                return RandomVariable(
+                    generator_func=lambda: getattr(self.generator_func(), property_)()
+                )
+            else:
+                return RandomVariable(
+                    generator_func=lambda: getattr(self.generator_func(), property_)
+                )
         else:
-            if not hasattr(self.example_sample, property_):
-                raise ValueError(f"Property {property_} not available.")
-            elif callable(getattr(self.example_sample, property_)):
+            if callable(getattr(self.example_sample, property_)):
                 return RandomVariable(
                     samples=[getattr(sample, property_)() for sample in self.samples]
                 )
@@ -89,6 +101,8 @@ class RandomVariable:
                 self.samples += np.choice(self.samples, size=N - len(self.samples), replace=True)
 
             # delete cached properties based on samples
+            # because more samples are available for more accurate statistical measures
+            # TODO: allow for more efficient update factoring in existing value
             if hasattr(self, "expected_value"):
                 del self.expected_value
             if hasattr(self, "variance"):
@@ -126,51 +140,63 @@ class RandomVariable:
         this property will generate samples based on the generator_func.
         :return: Generated amples of the random variable.
         """
-        return self._return_N_new_samples_from_generator_func(N=1000)
+        return self._return_N_new_samples_from_generator_func(N=self.N_samples_default)
 
     def pdf(self, x):
         """
         Calculate the probability density function of the random variable at x.
         Based on a kernel density estimate of the random variable.
-        Only works for univariate random variables. TODO: Allow multivariate random variables.
         :param x: Value to evaluate the probability density function at.
         :return: Probability density function at x.
         """
-        x = np.reshape(x, (1, -1))
-        bandwith = 1e-2 * (np.max(self.samples) - np.min(self.samples))
-        return (
-            1
-            / (len(self.samples) * bandwith * np.sqrt(2 * np.pi))
-            * np.dot(
-                np.ones((len(self.samples),)),
-                np.exp(-0.5 * ((x - np.array(self.samples)[:, np.newaxis]) / bandwith) ** 2),
-            )
-        )
+        return pdf(self)(x)
 
     def cdf(self, x):
         """
         Calculate the cumulative distribution function of the random variable at x.
         Based on the empirical cumulative distribution function of the random variable.
-        Only works for univariate random variables. TODO: Allow multivariate random variables.
         :param x: Value to evaluate the cumulative distribution function at.
         :return: Cumulative distribution function at x.
         """
-        return np.mean(np.array(self.samples)[:, np.newaxis] <= x, axis=0)
+        return cdf(self)(x)
+
+    def _try_statistical_measure(foo):
+        """
+        Try to calculate a statistical measure of the random variable.
+        If the random variable is not numeric, a TypeError is raised.
+        :param func: Statistical measure function to calculate.
+        :return: Statistical measure of the random variable.
+        """
+
+        def inner(self):
+            try:
+                return foo(self)
+            except TypeError as e:
+                raise TypeError(
+                    "RandomVariable must be numeric to calculate "
+                    "expected value, variance, skewness and kurtosis. "
+                    "Numeric RandomVariable can e.g. be int, float or a numpy ndarray. "
+                    "Specifically the class of the randomized object must "
+                    "Custom classes work if they implement __add__, radd__, "
+                    "__mul__, rmul__, __truediv__ and rtruediv__ methods. "
+                )
+
+        return inner
 
     @cached_property
+    @_try_statistical_measure
     def expected_value(self):
         r"""
         Calculates expected value $\mu = E[X]$ of the random variable.
-        Class of randomized object must implement __add__ and __truediv__ methods.
         :return: Expected value $\mu$
         """
         return sum(self.samples) / len(self.samples)
 
     @cached_property
+    @_try_statistical_measure
     def variance(self):
         r"""
         Calculates variance $\sigma^2 = E[(X - \mu)^2]$ of the random variable.
-        Class of randomized object must implement __add__ and __truediv__ methods.
         :return: Variance $\sigma^2$
         """
         return sum([(sample - self.expected_value) ** 2 for sample in self.samples]) / (
@@ -178,11 +204,11 @@ class RandomVariable:
         )
 
     @cached_property
+    @_try_statistical_measure
     def skewness(self):
         r"""
         Calculates skewness $\gamma = E \left[ \left( \\frac{X -\mu}{\sigma} \\right)^3 \\right]$
         of the random variable.
-        Class of randomized object must implement __add__ and __truediv__ methods.
         :return: Skewness $\gamma$
         """
         return (
@@ -192,11 +218,11 @@ class RandomVariable:
         )
 
     @cached_property
+    @_try_statistical_measure
     def kurtosis(self):
         r"""
         Calculates kurtosis $\\beta = E \left[ \left( \\frac{X -\mu}{\sigma} \\right)^4 \\right]$
         of the random variable.
-        Class of randomized object must implement __add__ and __truediv__ methods.
         :return: Kurtosis $\\beta$
         """
         return (

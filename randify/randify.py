@@ -3,23 +3,22 @@ from time import perf_counter
 
 
 def randify(duration: float = 1, N: int = -1, verbose: bool = False):
+    """
+    Decorator that takes a function foo and allows RandomVariables as input.
+    Performs Monte Carlo simulation by evaluating foo on samples of the input RandomVariables.
+    :param foo: function to transform probability distributions
+    :param N: optional, number of iterations for Monte Carlo simulation.
+        Default: -1 for automatic number of iterations.
+    :param duration: optional, Approximate duration of the simulation in seconds.
+        Used to determine N if N=-1.
+        No effect if N!=-1 or one of the RandomVariables provides samples.
+        Default: 1 second.
+    :param verbose: optional, print additional information.
+        Default: False
+    :return: function that allows RandomVariables as input and returns RandomVariables as output
+    """
+
     def randify_decorator(foo):
-        """
-        Decorator that takes a function foo and allows RandomVariables as input.
-        Performs Monte Carlo simulation by evaluating foo on samples of the input RandomVariables.
-
-        :param foo: function to transform probability distributions
-        :param N: optional, number of iterations for Monte Carlo simulation.
-            Default: -1 for automatic number of iterations.
-        :param duration: optional, Approximate duration of the simulation in seconds.
-            Used to determine N if N=-1.
-            No effect if N!=-1 or one of the RandomVariables provides samples.
-            Default: 1 second.
-        :param verbose: optional, print additional information.
-            Default: False
-        :return: function that allows RandomVariables as input and returns RandomVariables as output
-        """
-
         def inner(*args, **kwargs):
             start_total = perf_counter()
 

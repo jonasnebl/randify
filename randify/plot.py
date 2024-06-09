@@ -2,27 +2,8 @@ from .RandomVariable import RandomVariable
 import matplotlib.pyplot as plt
 import numpy as np
 
-# TODO: Remove histogram usages and use built-in PDF functions from RandomVariable
 
-
-def _x_value_helper_for_histogram(bin_edges):
-    """
-    Helper function to extend bin_edges with zeros for plotting vertical lines.
-    Also calculates the x values for the bin centers instead of the bin edges.
-    :param bin_edges: Bin edges from np.histogram or np.histogram2d.
-    :return: Bin centers.
-    """
-    bin_edges_extended = np.concatenate(
-        (
-            bin_edges[[0]] - 1e-3 * (np.max(bin_edges) - np.min(bin_edges)),
-            bin_edges,
-            bin_edges[[-1]] + 1e-3 * (np.max(bin_edges) - np.min(bin_edges)),
-        )
-    )
-    return 0.5 * (bin_edges_extended[:-1] + bin_edges_extended[1:])
-
-
-def plot_decorator(foo):
+def _plot_decorator(foo):
     """
     Decorator for plotting multiple RandomVariables in one matplotlib figure.
     :param foo: Function that plots the probability density function of one RandomVariable.
@@ -67,7 +48,7 @@ def plot_decorator(foo):
     return inner
 
 
-@plot_decorator
+@_plot_decorator
 def plot_pdf(ax, ranvar, ranvar_name, plot_expected_value: bool = True):
     """
     Plot the 1D probability density function of one RandomVariable object.
@@ -101,7 +82,7 @@ def plot_pdf(ax, ranvar, ranvar_name, plot_expected_value: bool = True):
     return "Probability density function"
 
 
-@plot_decorator
+@_plot_decorator
 def plot_cdf(ax, ranvar, ranvar_name, plot_expected_value: bool = True):
     """
     Plot the 1D cumulative distribution function of one RandomVariable object.

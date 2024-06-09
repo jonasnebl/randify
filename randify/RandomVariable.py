@@ -1,6 +1,6 @@
 from functools import cached_property
 import numpy as np
-from .utils import *
+from .utils import pdf
 
 
 class RandomVariable:
@@ -150,15 +150,6 @@ class RandomVariable:
         :return: Probability density function at x.
         """
         return pdf(self)(x)
-
-    def cdf(self, x):
-        """
-        Calculate the cumulative distribution function of the random variable at x.
-        Based on the empirical cumulative distribution function of the random variable.
-        :param x: Value to evaluate the cumulative distribution function at.
-        :return: Cumulative distribution function at x.
-        """
-        return cdf(self)(x)
 
     def _try_statistical_measure(foo):
         """

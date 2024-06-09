@@ -80,37 +80,3 @@ def plot_pdf(ax, ranvar, ranvar_name, plot_expected_value: bool = True):
         )
 
     return "Probability density function"
-
-
-@_plot_decorator
-def plot_cdf(ax, ranvar, ranvar_name, plot_expected_value: bool = True):
-    """
-    Plot the 1D cumulative distribution function of one RandomVariable object.
-    :param plot_expected_value: If True, the expected value is plotted as a vertical line.
-    :param kwargs: RandomVariable to be plotted.
-        Use the keyword to set the title for the plot.
-        Example:
-        plotPDF(x1=x1, 2=x2)
-        This will make two subplots, one 1D plot for x1 and one plot for x2.
-    """
-    x_values = np.linspace(np.min(ranvar.samples), np.max(ranvar.samples), 100)
-    cdf_values = ranvar.cdf(x_values)
-
-    ax.plot(x_values, cdf_values, label="$p(x)$")
-    ax.fill_between(x_values, cdf_values, alpha=0.1)
-    ax.set_xlabel("$x$")
-    ax.set_ylabel("$F(x)$")
-    ax.set_title(ranvar_name)
-    ax.set_ylim(0, 1.2)
-
-    if plot_expected_value:
-        ax.axvline(ranvar.expected_value, color="red", label="Expected value")
-        ax.text(
-            ranvar.expected_value,
-            0.98 * ax.get_ylim()[1],
-            f" E[{ranvar_name}]",
-            color="red",
-            verticalalignment="top",
-        )
-
-    return "Cumulative distribution function"

@@ -59,11 +59,22 @@ def _extract_given_samples(*args, sample_inital_shapes):
 
 def pdf(*args):
     """
-    Calculate the probability density function of the random variable at x.
-    Based on a kernel density estimate of the random variable.
-    Only works for univariate random variables. TODO: Allow multivariate random variables.
-    :param x: Value to evaluate the probability density function at.
-    :return: Probability density function at x.
+    Calculate the probability density function of one or multiple RandomVariables.
+    Based on a kernel density estimation using sklearn's KernelDensity of the random variable.
+    Examples:
+    .. code-block:: python
+        x1 = RandomVariable(np.random.normal, loc=0, scale=1)
+        x2 = RandomVariable(np.random.normal, loc=0, scale=1)
+        x3 = RandomVariable(np.random.multivariate_normal, mean=np.zeros(2,), cov=np.eye(2))
+        pdf(x1)(0) # will give the marginal pdf of x1 evaluated at x1=0.
+        pdf(x1, x2)(0,0) # will give the joint pdf of x1 and x2 evaluated at x1=0, x2=0.
+        pdf(x3)([0,0]) # will give the pdf of x3 evaluated at x3=[0,0].
+        pdf(x1, x3)(0,[0,0]) # will give the joint pdf of x1 and x3 evaluated at x1=0, x3=[0,0].
+    The function allows multiple values at once if they are stacked along the 0-th axis:
+    .. code-block:: python
+        pdf(x1, x3)([0,1], [[0,0], [1,1]]) # will give the pdf at x1=0, x3=[0,0] and x1=1, x3=[1,1].
+    :param *args: RandomVariable objects to calculate the joint probability density function of.
+    :return: Probability density function at given input.
     """
     samples_total, sample_inital_shapes = _extract_samples_from_ranvar(*args)
     kde = KernelDensity(kernel="gaussian", bandwidth=0.1).fit(samples_total)
@@ -79,7 +90,7 @@ def pdf(*args):
     return _pdf
 
 
-def cdf(*args, **kwargs):
+def cdf(*args):
     """
     Calculate the cumulative distribution function of the random variable at x.
     Based on the empirical cumulative distribution function of the random variable.

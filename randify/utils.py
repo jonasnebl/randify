@@ -77,7 +77,7 @@ def pdf(*args):
     :return: Probability density function at given input.
     """
     samples_total, sample_inital_shapes = _extract_samples_from_ranvar(*args)
-    kde = KernelDensity(kernel="gaussian", bandwidth=0.1).fit(samples_total)
+    kde = KernelDensity(kernel="gaussian", bandwidth=1e-3).fit(samples_total)
 
     def _pdf(*args):
         x = _extract_given_samples(*args, sample_inital_shapes=sample_inital_shapes)
@@ -88,20 +88,3 @@ def pdf(*args):
             return pdf_value
 
     return _pdf
-
-
-def cdf(*args):
-    """
-    Calculate the cumulative distribution function of the random variable at x.
-    Based on the empirical cumulative distribution function of the random variable.
-    Only works for univariate random variables. TODO: Allow multivariate random variables.
-    :param x: Value to evaluate the cumulative distribution function at.
-    :return: Cumulative distribution function at x.
-    """
-    samples_total = _extract_samples_from_ranvar(*args)
-
-    def _cdf(*args):
-        x = _extract_given_samples(*args)
-        return
-
-    return _cdf

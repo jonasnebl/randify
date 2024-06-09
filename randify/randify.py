@@ -31,57 +31,54 @@ def randify(duration: float = 1, N: int = -1, verbose: bool = False):
                 if isinstance(arg, RandomVariable):
                     random_variable_indices.append(count)
 
-            if not random_variable_indices:
-                return foo(*args, **kwargs)
+            # evalute foo once to determine return structure and execution time
+            for random_variable_index in random_variable_indices:
+                arguments[random_variable_index] = initial_arguments[
+                    random_variable_index
+                ].sample()
+            start = perf_counter()
+            y = foo(*arguments)
+            duration_foo = perf_counter() - start
+            if N == -1:  # automatic number of iterations
+                N_samples = int(duration / duration_foo)
             else:
-                # evalute foo once to determine return structure and execution time
+                N_samples = N
+            returns_tuple = isinstance(y, tuple)
+            if returns_tuple:
+                N_return = len(y)
+                result_samples = [[] for _ in range(N_return)]
+            else:
+                N_return = 1
+                result_samples = []
+
+            # retrieve N_samples samples from Random variables
+            input_samples = [None] * len(initial_arguments)
+            for random_variable_index in random_variable_indices:
+                input_samples[random_variable_index] = initial_arguments[
+                    random_variable_index
+                ]._return_N_samples(N_samples)
+
+            # Monte-Carlo simulation
+            for i in range(N_samples):
+                # build function arguments
                 for random_variable_index in random_variable_indices:
-                    arguments[random_variable_index] = initial_arguments[
-                        random_variable_index
-                    ].sample()
-                start = perf_counter()
+                    arguments[random_variable_index] = input_samples[random_variable_index][i]
                 y = foo(*arguments)
-                duration_foo = perf_counter() - start
-                if N == -1:  # automatic number of iterations
-                    N_samples = int(duration / duration_foo)
-                else:
-                    N_samples = N
-                returns_tuple = isinstance(y, tuple)
                 if returns_tuple:
-                    N_return = len(y)
-                    result_samples = [[] for _ in range(N_return)]
+                    for j in range(N_return):
+                        result_samples[j].append(y[j])
                 else:
-                    N_return = 1
-                    result_samples = []
+                    result_samples.append(y)
 
-                # retrieve N_samples samples from Random variables
-                input_samples = [None] * len(initial_arguments)
-                for random_variable_index in random_variable_indices:
-                    input_samples[random_variable_index] = initial_arguments[
-                        random_variable_index
-                    ]._return_N_samples(N_samples)
+            if verbose:
+                print(
+                    f"Randify: {N_samples} samples evaluated in {perf_counter() - start_total:.3f}s."
+                )
 
-                # Monte-Carlo simulation
-                for i in range(N_samples):
-                    # build function arguments
-                    for random_variable_index in random_variable_indices:
-                        arguments[random_variable_index] = input_samples[random_variable_index][i]
-                    y = foo(*arguments)
-                    if returns_tuple:
-                        for j in range(N_return):
-                            result_samples[j].append(y[j])
-                    else:
-                        result_samples.append(y)
-
-                if verbose:
-                    print(
-                        f"Randify: {N_samples} samples evaluated in {perf_counter() - start_total:.3f}s."
-                    )
-
-                if returns_tuple:
-                    return tuple(RandomVariable(samples=result_samples[i]) for i in range(N_return))
-                else:
-                    return RandomVariable(samples=result_samples)
+            if returns_tuple:
+                return tuple(RandomVariable(samples=result_samples[i]) for i in range(N_return))
+            else:
+                return RandomVariable(samples=result_samples)
 
         return inner
 

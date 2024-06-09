@@ -69,6 +69,14 @@ class RandomVariable:
                 return RandomVariable(
                     samples=[getattr(sample, property_) for sample in self.samples]
                 )
+            
+    def __getitem__(self, key):
+        """
+        If the randomVariable is a list, ndarray or dict, return a RandomVariable of the key element.
+        :param key: Key of the element to return as RandomVariable.
+        :return: RandomVariable of the key element.
+        """
+        return RandomVariable(samples=[sample[key] for sample in self.samples])
 
     def sample(self, N: int = 1):
         """

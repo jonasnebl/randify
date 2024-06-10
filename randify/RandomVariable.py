@@ -94,7 +94,7 @@ class RandomVariable:
         """
         Returns N samples of the random variable. If more than N samples are available,
         N samples are randomly selected. If less than N samples are available,
-        the samples are extended to the number N. Instead of sample(), 
+        the samples are extended to the number N. Instead of sample(),
         this function may change the number of self.samples and is for interal use only.
         :param N: Number of samples to generate
         """

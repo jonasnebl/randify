@@ -94,3 +94,13 @@ def pdf(*args, kernel="gaussian", bandwidth=None):
             return pdf_value
 
     return _pdf
+
+
+def cov(*args):
+    """
+    Calculate the covariance matrix of multiple RandomVariables.
+    :param *args: RandomVariable objects.
+    :return: np.ndarray, Covariance matrix of all RandomVariable objects.
+    """
+    samples_total, sample_inital_shapes = _extract_samples_from_ranvar(*args)
+    return np.cov(samples_total, rowvar=False)

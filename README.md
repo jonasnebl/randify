@@ -1,7 +1,10 @@
 # Randify
 
-Evaluate how your code reacts to randomly distributed inputs.
-Define inputs as random variables and perform Monte Carlo simulations to estimate probability density distributions (PDF) of your outputs. Designed for simple syntax.
+Randomize your existing code with randify.
+Evaluate how your code reacts to randomly distributed inputs and evaluate the probability distributions of your code outputs.
+Randify performs Monte Carlo simulations to estimate probability density distributions (PDF) of your outputs. Designed for simple syntax.
+
+Full API documentation at https://jonasnebl.github.io/randify/randify.html
 
 ## Installation
 ```
@@ -25,7 +28,7 @@ y1, x2 = f(x1, x2)
 Now you want to evaluate how random inputs `x1` and `x2` influence the results `y1`and `y2` using randify.
 For this you need to do two things:
 1. Add the `@randify()` decorator to `f` (with parentheses!).
-2. Define `x1`and/or `x2`as a RandomVariable. For selecting a probability distribution, you can pass e.g. functions from numpy's random module.
+2. Define `x1`and/or `x2`as a RandomVariable. For selecting a probability distribution, you can pass e.g. functions from `numpy`'s random module.
 ```
 from randify import randify, RandomVariable
 import numpy as np
@@ -38,22 +41,22 @@ x1 = RandomVariable(np.random.normal, loc=0, scale=1)
 x2 = RandomVariable(np.random.uniform, low=-1, high=1)
 y1, y2 = f(x1, x2)
 ```
-`y1`and `y2` are now also random variables. To display the estimated probability distributions, you can use randify's plotPDF function:
+`y1`and `y2` are now also random variables. To display the estimated probability distributions, you can use randify's plot_pdf function:
 ```
 from randify import plotPDF
-plotPDF(x1=x1, x2=x2, y1=y1, y2=y2)
+plot_pdf(x1=x1, x2=x2, y1=y1, y2=y2)
 ```
 
 ## Documentation
 
-Use `pdoc` to automatically generate html documentation.
+The documentation is generated automatically using `pdoc`.
 ```
 $ pip install pdoc
-$ pdoc randify --math
+$ pdoc randify --math - o ./doc
 ```
 
 ## Formatting 
-Use `ruff` to format.
+`ruff` is used to format randify. 
 ```
 $ pip install ruff
 $ ruff format

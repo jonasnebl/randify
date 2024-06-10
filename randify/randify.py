@@ -33,9 +33,7 @@ def randify(duration: float = 1, N: int = -1, verbose: bool = False):
 
             # evalute foo once to determine return structure and execution time
             for random_variable_index in random_variable_indices:
-                arguments[random_variable_index] = initial_arguments[
-                    random_variable_index
-                ].sample()
+                arguments[random_variable_index] = initial_arguments[random_variable_index].sample()
             start = perf_counter()
             y = foo(*arguments)
             duration_foo = perf_counter() - start

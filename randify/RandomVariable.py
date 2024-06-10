@@ -34,12 +34,11 @@ class RandomVariable:
                 "Invalid initialization. Either 'generator_func' or 'samples' must be provided."
             )
 
-        # determine type
+        # save example sample for determining type and properties of the randomized variable
         if "samples" in self.__dict__:  # avoid hasattr to not trigger cached_property
             self.example_sample = self.samples[0]
         elif hasattr(self, "generator_func"):
             self.example_sample = self.generator_func(*self.generator_args, **self.generator_kwargs)
-        self._type = type(self.example_sample).__name__
 
     def __call__(self, property_: str = None):
         """
@@ -69,7 +68,7 @@ class RandomVariable:
                 return RandomVariable(
                     samples=[getattr(sample, property_) for sample in self.samples]
                 )
-            
+
     def __getitem__(self, key):
         """
         If the randomVariable is a list, ndarray or dict, return a RandomVariable of the key element.
@@ -84,7 +83,10 @@ class RandomVariable:
         :return: N Samples of the random variable.
         """
         if hasattr(self, "generator_func"):
-            return self._return_N_new_samples_from_generator_func(N)
+            if N == 1:
+                return self._return_N_new_samples_from_generator_func(N)[0]
+            else:
+                return self._return_N_new_samples_from_generator_func(N)
         else:
             return np.random.choice(self.samples, size=N, replace=True)
 
@@ -92,7 +94,8 @@ class RandomVariable:
         """
         Returns N samples of the random variable. If more than N samples are available,
         N samples are randomly selected. If less than N samples are available,
-        the samples are extended to the number N.
+        the samples are extended to the number N. Instead of sample(), 
+        this function may change the number of self.samples and is for interal use only.
         :param N: Number of samples to generate
         """
         if len(self.samples) == N:
@@ -110,7 +113,6 @@ class RandomVariable:
 
             # delete cached properties based on samples
             # because more samples are available for more accurate statistical measures
-            # TODO: allow for more efficient update factoring in existing value
             if hasattr(self, "expected_value"):
                 del self.expected_value
             if hasattr(self, "variance"):
@@ -138,18 +140,15 @@ class RandomVariable:
             samples = [
                 self.generator_func(*self.generator_args, **self.generator_kwargs) for _ in range(N)
             ]
-        if len(samples) == 1:
-            return samples[0]
-        else:
-            return samples
+        return samples
 
     @cached_property
     def samples(self):
         """
         Samples attribute as cached property.
         If no samples are provided and samples are needed (e.g. for statistical measure calculation),
-        this property will generate samples based on the generator_func.
-        :return: Generated amples of the random variable.
+        this function will be kalled and generate samples based on the generator_func.
+        :return: Generated samples of the random variable.
         """
         return self._return_N_new_samples_from_generator_func(N=self.N_samples_default)
 
@@ -166,8 +165,8 @@ class RandomVariable:
         """
         Try to calculate a statistical measure of the random variable.
         If the random variable is not numeric, a TypeError is raised.
-        :param func: Statistical measure function to calculate.
-        :return: Statistical measure of the random variable.
+        :param foo: Function to calculate the statistical measure.
+        :return: Wrapper function with try-except block around foo().
         """
 
         def inner(self):
@@ -244,7 +243,7 @@ class RandomVariable:
         Return a string representation of the random variable for printing.
         :return: String representation of the random variable.
         """
-        string = f"<RandomVariable of type {self._type}"
+        string = f"<RandomVariable of type {self.type(self.example_sample).__name__}"
         if hasattr(self, "generator_func"):
             string += f" with {self.generator_func.__name__} distribution"
         else:

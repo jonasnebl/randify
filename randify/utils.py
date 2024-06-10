@@ -4,11 +4,11 @@ from sklearn.neighbors import KernelDensity
 
 def _extract_samples_from_ranvar(*args):
     """
-    Helper function for extracting samples and concatenating them into a single array.
+    Helper function for extracting samples from multiple RandomVariables
+    The samples are concatenated into a single array.
     :param *args: RandomVariable objects.
     :return: np.ndarray, Concatenated samples of all RandomVariable objects.
     """
-
     N_samples_per_ranvar = [len(ranvar.samples) for ranvar in args]
     sample_initial_shapes = [np.shape(ranvar.example_sample) for ranvar in args]
     samples_total = np.zeros((min(N_samples_per_ranvar), 0))
@@ -22,8 +22,9 @@ def _extract_samples_from_ranvar(*args):
 
 def _extract_given_samples(*args, sample_inital_shapes):
     """
-    Helper function for extracting given samples and concatenating them into a single array.
-    :param *args: iterables of samples
+    Helper function for extracting given samples that are given as seperate arguments.
+    The samples are concatenated into a single array.
+    :param *args: multiple lists or np.ndarrays of samples
     :return: np.ndarray, Concatenated samples of all RandomVariable objects.
     """
     if len(args) != len(sample_inital_shapes):
@@ -57,7 +58,7 @@ def _extract_given_samples(*args, sample_inital_shapes):
     return given_samples
 
 
-def pdf(*args):
+def pdf(*args, kernel="gaussian", bandwidth=None):
     """
     Calculate the probability density function of one or multiple RandomVariables.
     Based on a kernel density estimation using sklearn's KernelDensity of the random variable.
@@ -74,10 +75,15 @@ def pdf(*args):
     .. code-block:: python
         pdf(x1, x3)([0,1], [[0,0], [1,1]]) # will give the pdf at x1=0, x3=[0,0] and x1=1, x3=[1,1].
     :param *args: RandomVariable objects to calculate the joint probability density function of.
+    :param kernel: optional, kernel for the kernel density estimation. Default: "gaussian".
+    :param bandwidth: optional, bandwidth for the kernel density estimation. Default: None.
+        None will estimate the bandwidth automatically.
     :return: Probability density function at given input.
     """
     samples_total, sample_inital_shapes = _extract_samples_from_ranvar(*args)
-    kde = KernelDensity(kernel="gaussian", bandwidth=1e-2).fit(samples_total)
+    if bandwidth is None:
+        bandwith = 1e-2 * np.mean(np.max(samples_total, axis=0) - np.min(samples_total, axis=0))
+    kde = KernelDensity(kernel=kernel, bandwidth=bandwith).fit(samples_total)
 
     def _pdf(*args):
         x = _extract_given_samples(*args, sample_inital_shapes=sample_inital_shapes)

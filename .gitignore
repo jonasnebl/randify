@@ -7,4 +7,5 @@ venv/
 requirements.txt
 dist/
 doc/
+docs/
 playground.py

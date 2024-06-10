@@ -138,7 +138,10 @@ class RandomVariable:
             samples = [
                 self.generator_func(*self.generator_args, **self.generator_kwargs) for _ in range(N)
             ]
-        return samples
+        if len(samples) == 1:
+            return samples[0]
+        else:
+            return samples
 
     @cached_property
     def samples(self):

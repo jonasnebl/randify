@@ -77,7 +77,7 @@ def pdf(*args):
     :return: Probability density function at given input.
     """
     samples_total, sample_inital_shapes = _extract_samples_from_ranvar(*args)
-    kde = KernelDensity(kernel="gaussian", bandwidth=1e-3).fit(samples_total)
+    kde = KernelDensity(kernel="gaussian", bandwidth=1e-2).fit(samples_total)
 
     def _pdf(*args):
         x = _extract_given_samples(*args, sample_inital_shapes=sample_inital_shapes)

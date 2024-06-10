@@ -6,6 +6,5 @@ venv/
 *.egg-info/
 requirements.txt
 dist/
-doc/
-docs/
+notes/
 playground.py

@@ -1,3 +1,4 @@
+from functools import wraps
 from .RandomVariable import RandomVariable
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,6 +11,7 @@ def _plot_decorator(foo):
     :return: Function that plots the probability density function of multiple RandomVariables.
     """
 
+    @wraps(foo)
     def inner(*args, **kwargs):
         N_subplots = len(kwargs)
         subplots_rows = int(np.sqrt(N_subplots))
@@ -62,10 +64,10 @@ def plot_pdf(ax, ranvar, ranvar_name, plot_expected_value: bool = True):
     x_values = np.linspace(np.min(ranvar.samples), np.max(ranvar.samples), 100)
     pdf_values = ranvar.pdf(x_values)
 
-    ax.plot(x_values, pdf_values, label="$p(" + ranvar_name + ")$")
+    ax.plot(x_values, pdf_values, label="p(" + ranvar_name + ")")
     ax.fill_between(x_values, pdf_values, alpha=0.1)
-    ax.set_xlabel("$" + ranvar_name + "$")
-    ax.set_ylabel("$p(" + ranvar_name + ")$")
+    ax.set_xlabel(ranvar_name)
+    ax.set_ylabel("p(" + ranvar_name + ")")
     ax.set_title(ranvar_name)
     ax.set_ylim(0, np.max(pdf_values) * 1.2)
 

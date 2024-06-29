@@ -82,8 +82,8 @@ def pdf(*args, kernel="gaussian", bandwidth=None):
     """
     samples_total, sample_inital_shapes = _extract_samples_from_ranvar(*args)
     if bandwidth is None:
-        bandwith = 1e-2 * np.mean(np.max(samples_total, axis=0) - np.min(samples_total, axis=0))
-    kde = KernelDensity(kernel=kernel, bandwidth=bandwith).fit(samples_total)
+        bandwidth = "scott"
+    kde = KernelDensity(kernel=kernel, bandwidth=bandwidth).fit(samples_total)
 
     def _pdf(*args):
         x = _extract_given_samples(*args, sample_inital_shapes=sample_inital_shapes)

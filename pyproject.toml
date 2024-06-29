@@ -13,11 +13,9 @@ keywords = ["montecarlo", "random"]
 
 dependencies = [
   "numpy",
-  "matplotlib"
+  "matplotlib",
+  "scikit-learn"
 ]
-
-[tool.pytest.ini_options]
-testpaths = "tests"
 
 [project.readme]
 file = "README.md"
@@ -36,7 +34,6 @@ line-length = 100
 [tool.ruff.lint]
 select = [
     "B", # flake8-bugbear
-    "W292", # empty line at end of file
 ]
 
 ignore = [

@@ -36,6 +36,11 @@ def randify(foo, duration: float = 1, N: int = -1, verbose: bool = True):
         start = perf_counter()
         y = foo(*arguments)
         duration_foo = perf_counter() - start
+        if duration_foo <= 1e-3:  # perform more accurate time measurement for fast functions
+            start = perf_counter()
+            for i in range(9):
+                y = foo(*arguments)
+            duration_foo += perf_counter() - start
         if N == -1:  # automatic number of iterations
             N_samples = int(duration / duration_foo)
         else:

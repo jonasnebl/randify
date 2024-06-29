@@ -1,4 +1,4 @@
-from functools import cached_property
+from functools import cached_property, wraps
 import numpy as np
 from .utils import pdf
 
@@ -169,6 +169,7 @@ class RandomVariable:
         :return: Wrapper function with try-except block around foo().
         """
 
+        @wraps(foo)
         def inner(self):
             try:
                 return foo(self)
@@ -243,7 +244,7 @@ class RandomVariable:
         Return a string representation of the random variable for printing.
         :return: String representation of the random variable.
         """
-        string = f"<RandomVariable of type {self.type(self.example_sample).__name__}"
+        string = f"<RandomVariable of type {type(self.example_sample).__name__}"
         if hasattr(self, "generator_func"):
             string += f" with {self.generator_func.__name__} distribution"
         else:

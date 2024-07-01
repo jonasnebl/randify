@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.neighbors import KernelDensity
+from KDEpy import TreeKDE
 
 
 def _extract_samples_from_ranvar(*args):
@@ -9,11 +9,11 @@ def _extract_samples_from_ranvar(*args):
     :param *args: RandomVariable objects.
     :return: np.ndarray, Concatenated samples of all RandomVariable objects.
     """
-    N_samples_per_ranvar = [len(ranvar.samples) for ranvar in args]
+    N_samples_per_ranvar = [len(ranvar._samples) for ranvar in args]
     sample_initial_shapes = [np.shape(ranvar.example_sample) for ranvar in args]
     samples_total = np.zeros((min(N_samples_per_ranvar), 0))
     for ranvar in args:
-        samples_ranvar = ranvar.samples[: min(N_samples_per_ranvar)]
+        samples_ranvar = ranvar._samples[: min(N_samples_per_ranvar)]
         samples_ranvar = np.array([np.reshape(sample, -1) for sample in samples_ranvar])
         samples_total = np.concatenate((samples_total, samples_ranvar), axis=1)
 
@@ -28,7 +28,7 @@ def _extract_given_samples(*args, sample_inital_shapes):
     :return: np.ndarray, Concatenated samples of all RandomVariable objects.
     """
     if len(args) != len(sample_inital_shapes):
-        raise ValueError("Number of given samples does not match number of random variables.")
+        raise ValueError("Number of given samples does not match number of RandomVariables.")
     else:
         given_samples = None
         for ranvar_values, sample_initial_shape in zip(args, sample_inital_shapes):
@@ -52,7 +52,7 @@ def _extract_given_samples(*args, sample_inital_shapes):
                     )
             else:
                 raise ValueError(
-                    "Shape of given samples does not match shape of random variable samples."
+                    "Shape of given samples does not match shape of RandomVariable samples."
                 )
 
     return given_samples
@@ -61,7 +61,7 @@ def _extract_given_samples(*args, sample_inital_shapes):
 def pdf(*args, kernel="gaussian", bandwidth=None):
     """
     Calculate the probability density function of one or multiple RandomVariables.
-    Based on a kernel density estimation using sklearn's KernelDensity of the random variable.
+    Based on a kernel density estimation using KDEpy.
     Examples:
     .. code-block:: python
         x1 = RandomVariable(np.random.normal, loc=0, scale=1)
@@ -75,30 +75,41 @@ def pdf(*args, kernel="gaussian", bandwidth=None):
     .. code-block:: python
         pdf(x1, x3)([0,1], [[0,0], [1,1]]) # will give the pdf at x1=0, x3=[0,0] and x1=1, x3=[1,1].
     :param *args: RandomVariable objects to calculate the joint probability density function of.
-    :param kernel: optional, kernel for the kernel density estimation. Default: "gaussian".
-    :param bandwidth: optional, bandwidth for the kernel density estimation. Default: None.
+    :param kernel: Kernel for the kernel density estimation. Default "gaussian".
+    :param bandwidth: Bandwidth for the kernel density estimation. Default None.
         None will estimate the bandwidth automatically.
     :return: Probability density function at given input.
     """
-    samples_total, sample_inital_shapes = _extract_samples_from_ranvar(*args)
-    if bandwidth is None:
-        bandwidth = "scott"
-    kde = KernelDensity(kernel=kernel, bandwidth=bandwidth).fit(samples_total)
+    if len(args) == 1 and hasattr(args[0], "_pdf_foo"):
+        # check for cached pdf function if only one RandomVariable is involved
+        return args[0]._pdf_foo
+    else:
+        samples_total, sample_inital_shapes = _extract_samples_from_ranvar(*args)
+        if bandwidth is None:
+            # https://www.stat.rice.edu/~scottdw/ss.nh.pdf, page 17
+            bandwidth = np.min(np.std(samples_total, axis=0)) * samples_total.shape[0] ** (
+                -1 / (samples_total.shape[1] + 4)
+            )
+        kde = TreeKDE(kernel=kernel, bw=bandwidth).fit(samples_total)
 
-    def _pdf(*args):
-        x = _extract_given_samples(*args, sample_inital_shapes=sample_inital_shapes)
-        pdf_value = np.exp(kde.score_samples(x))
-        if len(pdf_value) == 1:
-            return pdf_value[0]
-        else:
-            return pdf_value
+        def _pdf(*args):
+            x = _extract_given_samples(*args, sample_inital_shapes=sample_inital_shapes)
+            pdf_value = kde.evaluate(x)
+            if len(pdf_value) == 1:
+                return pdf_value[0]
+            else:
+                return pdf_value
 
-    return _pdf
+        if len(args) == 1:
+            # cache pdf function to RandomVariable object
+            args[0]._pdf_foo = _pdf
+
+        return _pdf
 
 
 def cov(*args):
     """
-    Calculate the covariance matrix of multiple RandomVariables.
+    Calculate the covariance matrix of one or multiple RandomVariables.
     :param *args: RandomVariable objects.
     :return: np.ndarray, Covariance matrix of all RandomVariable objects.
     """

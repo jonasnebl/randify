@@ -5,45 +5,54 @@ from .utils import pdf
 
 class RandomVariable:
     """
-    Class extending an arbitrary python object to a random variable.
-    The random variable can be defined in two ways:
-    1. generator_func that generates samples of the random variable
-    2. samples of the random variable
-    Most functionalities are based on the samples of the random variable.
-    If a generator_func is used, samples are generated internally based on the generator_func.
+    Class extending an arbitrary python object to a RandomVariable.
     """
 
-    def __init__(self, *args, **kwargs):
-        self.N_samples_default = 1000
+    def __init__(self, generator_func_or_samples, *args, **kwargs):
+        """
+        Constructor of the RandomVariable.
+        The RandomVariable can be defined in two ways:
+        1. generator_func that generates samples of the RandomVariable.
+        2. Samples of the RandomVariable. \n
+        Most functionalities are based on the samples of the RandomVariable.
+        If a generator_func is used, samples are generated internally based on the generator_func.
+        As generator function e.g. distributions from numpy.random can be used:
+        .. code-block:: python
+            x1 = RandomVariable(np.random.normal, loc=0, scale=1)
+        The arguments are piped through to np.random.normal.
+        You can also use lambda expression for custom generator functions:
+        .. code-block:: python
+            x2 = RandomVariable(lambda: np.random.uniform(0, 1, size=(3,)))
+        :param generator_func: Function that generates samples of the RandomVariable.
+        :param samples: Samples of the RandomVariable.
+        :param *args: Arguments for the generator_func.
+        :param **kwargs: Keyword arguments for the generator_func.
+        :return: RandomVariable object.
+        """
+        self._N_samples_default = int(1e3)
 
         # parse input and check whether samples or generator_func are used for initialization
-        if args and isinstance(args[0], list):
-            self.samples = args[0]
-        elif "samples" in kwargs:
-            self.samples = kwargs["samples"]
-        elif args and callable(args[0]):
-            self.generator_func = args[0]
-            self.generator_args = args[1:]
+        if callable(generator_func_or_samples):
+            self.generator_func = generator_func_or_samples
+            self.generator_args = args
             self.generator_kwargs = kwargs
-        elif "generator_func" in kwargs:
-            self.generator_func = kwargs.pop("generator_func")
-            self.generator_args = []
-            self.generator_kwargs = kwargs
+        elif isinstance(generator_func_or_samples, list):
+            self._samples = generator_func_or_samples
         else:
             raise ValueError(
-                "Invalid initialization. Either 'generator_func' or 'samples' must be provided."
+                "Invalid initialization. Provide a callable generator_func or a list of samples."
             )
 
         # save example sample for determining type and properties of the randomized variable
-        if "samples" in self.__dict__:  # avoid hasattr to not trigger cached_property
-            self.example_sample = self.samples[0]
+        if "_samples" in self.__dict__:  # avoid hasattr to not trigger cached_property
+            self.example_sample = self._samples[0]
         elif hasattr(self, "generator_func"):
             self.example_sample = self.generator_func(*self.generator_args, **self.generator_kwargs)
 
     def __call__(self, property_: str = None):
         """
-        Returns whole object or single property as random variables.
-        :param property: optional, Property to extract from the random variable.
+        Returns whole object or single property as RandomVariables.
+        :param property_: optional, Property to extract from the RandomVariable.
         :return: RandomVariable object representing the whole object or a single property.
         """
         if property_ is None:
@@ -53,20 +62,20 @@ class RandomVariable:
         elif hasattr(self, "generator_func"):
             if callable(getattr(self.example_sample, property_)):
                 return RandomVariable(
-                    generator_func=lambda: getattr(self.generator_func(), property_)()
+                    lambda: getattr(self.generator_func(), property_)()
                 )
             else:
                 return RandomVariable(
-                    generator_func=lambda: getattr(self.generator_func(), property_)
+                    lambda: getattr(self.generator_func(), property_)
                 )
         else:
             if callable(getattr(self.example_sample, property_)):
                 return RandomVariable(
-                    samples=[getattr(sample, property_)() for sample in self.samples]
+                    [getattr(sample, property_)() for sample in self._samples]
                 )
             else:
                 return RandomVariable(
-                    samples=[getattr(sample, property_) for sample in self.samples]
+                    [getattr(sample, property_) for sample in self._samples]
                 )
 
     def __getitem__(self, key):
@@ -75,12 +84,13 @@ class RandomVariable:
         :param key: Key of the element to return as RandomVariable.
         :return: RandomVariable of the key element.
         """
-        return RandomVariable(samples=[sample[key] for sample in self.samples])
+        return RandomVariable([sample[key] for sample in self._samples])
 
     def sample(self, N: int = 1):
         """
-        Return N random samples of the random variable.
-        :return: N Samples of the random variable.
+        Return N random samples of the RandomVariable.
+        :param N: Number of samples
+        :return: N samples of the RandomVariable.
         """
         if hasattr(self, "generator_func"):
             if N == 1:
@@ -88,29 +98,29 @@ class RandomVariable:
             else:
                 return self._return_N_new_samples_from_generator_func(N)
         else:
-            return np.random.choice(self.samples, size=N, replace=True)
+            selected_indices = np.random.choice(len(self._samples), size=N, replace=True)
+            ret_samples = [self._samples[i] for i in selected_indices]
+            if N == 1:
+                return ret_samples[0]
+            else:
+                return ret_samples
 
     def _return_N_samples(self, N):
         """
-        Returns N samples of the random variable. If more than N samples are available,
+        Returns a list of N samples of the RandomVariable. If more than N samples are available,
         N samples are randomly selected. If less than N samples are available,
         the samples are extended to the number N. Instead of sample(),
-        this function may change the number of self.samples and is for interal use only.
-        :param N: Number of samples to generate
+        this function may change the number of self._samples and is for interal use only.
+        :param N: Number of samples
+        :return: list of N samples of the RandomVariable.
         """
-        if len(self.samples) == N:
-            return self.samples
-        elif len(self.samples) > N:
-            return self.samples[:N]
-        elif len(self.samples) < N:
-            if hasattr(self, "generator_func"):
-                self.samples += self._return_N_new_samples_from_generator_func(
-                    N - len(self.samples)
-                )
-            else:
-                # augment samples by reselecting existing samples if no generator_func is available
-                self.samples += np.choice(self.samples, size=N - len(self.samples), replace=True)
-
+        if len(self._samples) == N:
+            pass
+        elif len(self._samples) < N and hasattr(self, "generator_func"):
+            # new samples from generator function
+            self._samples += self._return_N_new_samples_from_generator_func(
+                    N - len(self._samples)
+            )
             # delete cached properties based on samples
             # because more samples are available for more accurate statistical measures
             if hasattr(self, "expected_value"):
@@ -121,21 +131,24 @@ class RandomVariable:
                 del self.skewness
             if hasattr(self, "kurtosis"):
                 del self.kurtosis
-
-            return self.samples
+        else:
+            selected_indices = np.random.choice(len(self._samples), size=N, replace=True)
+            self._samples = [self._samples[i] for i in selected_indices]
+        
+        return self._samples
 
     def _return_N_new_samples_from_generator_func(self, N: int):
         """
-        Generate N new samples of the random variable based on the generator_func.
+        Generate N new samples of the RandomVariable based on the generator_func.
         :param N: Number of samples to generate. Overwrites existing samples.
-        :return: N new samples of the random variable based on the generator_func.
+        :return: N new samples of the RandomVariable based on the generator_func.
         """
         try:  # E.g. numpy distributions allow a size argument, faster than list comprehension
             samples = list(
                 self.generator_func(*self.generator_args, **self.generator_kwargs, size=N)
             )
-            assert len(self.samples) == N
-            assert isinstance(self.samples[0], type(self.example_sample))
+            assert len(self._samples) == N
+            assert isinstance(self._samples[0], type(self.example_sample))
         except:
             samples = [
                 self.generator_func(*self.generator_args, **self.generator_kwargs) for _ in range(N)
@@ -143,19 +156,19 @@ class RandomVariable:
         return samples
 
     @cached_property
-    def samples(self):
+    def _samples(self):
         """
         Samples attribute as cached property.
         If no samples are provided and samples are needed (e.g. for statistical measure calculation),
-        this function will be kalled and generate samples based on the generator_func.
-        :return: Generated samples of the random variable.
+        this function will be called and generate samples based on the generator_func.
+        :return: Generated samples of the RandomVariable.
         """
-        return self._return_N_new_samples_from_generator_func(N=self.N_samples_default)
+        return self._return_N_new_samples_from_generator_func(N=self._N_samples_default)
 
     def pdf(self, x):
         """
-        Calculate the probability density function of the random variable at x.
-        Based on a kernel density estimate of the random variable.
+        Calculate the probability density function of the RandomVariable at x.
+        Based on a kernel density estimation using KDEpy.
         :param x: Value to evaluate the probability density function at.
         :return: Probability density function at x.
         """
@@ -163,8 +176,8 @@ class RandomVariable:
 
     def _try_statistical_measure(foo):
         """
-        Try to calculate a statistical measure of the random variable.
-        If the random variable is not numeric, a TypeError is raised.
+        Try to calculate a statistical measure of the RandomVariable.
+        If the RandomVariable is not numeric, a TypeError is raised.
         :param foo: Function to calculate the statistical measure.
         :return: Wrapper function with try-except block around foo().
         """
@@ -176,11 +189,9 @@ class RandomVariable:
             except TypeError as e:
                 raise TypeError(
                     "RandomVariable must be numeric to calculate "
-                    "expected value, variance, skewness and kurtosis. "
-                    "Numeric RandomVariable can e.g. be int, float or a numpy ndarray. "
-                    "Specifically the class of the randomized object must "
-                    "Custom classes work if they implement __add__, radd__, "
-                    "__mul__, rmul__, __truediv__ and rtruediv__ methods. "
+                    "expected value, variance, skewness and kurtosis, "
+                    "e.g. int, float or a numpy ndarray. "
+                    "Custom classes work if they implement the needed arithmetic operations."
                 )
 
         return inner
@@ -189,20 +200,20 @@ class RandomVariable:
     @_try_statistical_measure
     def expected_value(self):
         r"""
-        Calculates expected value $\mu = E[X]$ of the random variable.
+        Calculates expected value $\mu = E[X]$ of the RandomVariable.
         :return: Expected value $\mu$
         """
-        return sum(self.samples) / len(self.samples)
+        return sum(self._samples) / len(self._samples)
 
     @cached_property
     @_try_statistical_measure
     def variance(self):
         r"""
-        Calculates variance $\sigma^2 = E[(X - \mu)^2]$ of the random variable.
+        Calculates variance $\sigma^2 = E[(X - \mu)^2]$ of the RandomVariable.
         :return: Variance $\sigma^2$
         """
-        return sum([(sample - self.expected_value) ** 2 for sample in self.samples]) / (
-            len(self.samples) - 1
+        return sum([(-self.expected_value + sample) ** 2 for sample in self._samples]) / (
+            len(self._samples) - 1
         )
 
     @cached_property
@@ -210,13 +221,13 @@ class RandomVariable:
     def skewness(self):
         r"""
         Calculates skewness $\gamma = E \left[ \left( \\frac{X -\mu}{\sigma} \\right)^3 \\right]$
-        of the random variable.
+        of the RandomVariable.
         :return: Skewness $\gamma$
         """
         return (
-            sum([(sample - self.expected_value) ** 3 for sample in self.samples])
-            * len(self.samples)
-            / ((len(self.samples) - 1) * (len(self.samples) - 2) * self.variance**1.5)
+            sum([(-self.expected_value + sample) ** 3 for sample in self._samples])
+            * len(self._samples)
+            / ((len(self._samples) - 1) * (len(self._samples) - 2) * self.variance**1.5)
         )
 
     @cached_property
@@ -224,32 +235,27 @@ class RandomVariable:
     def kurtosis(self):
         r"""
         Calculates kurtosis $\\beta = E \left[ \left( \\frac{X -\mu}{\sigma} \\right)^4 \\right]$
-        of the random variable.
+        of the RandomVariable.
         :return: Kurtosis $\\beta$
         """
         return (
-            sum([(sample - self.expected_value) ** 4 for sample in self.samples])
-            * len(self.samples)
-            * (len(self.samples) + 1)
+            sum([(-self.expected_value + sample) ** 4 for sample in self._samples])
+            * len(self._samples)
+            * (len(self._samples) + 1)
             / (
-                (len(self.samples) - 1)
-                * (len(self.samples) - 2)
-                * (len(self.samples) - 3)
+                (len(self._samples) - 1)
+                * (len(self._samples) - 2)
+                * (len(self._samples) - 3)
                 * self.variance**2
             )
         )
 
     def __str__(self):
         """
-        Return a string representation of the random variable for printing.
-        :return: String representation of the random variable.
+        Return a string representation of the RandomVariable for printing.
+        :return: String representation of the RandomVariable.
         """
-        string = f"<RandomVariable of type {type(self.example_sample).__name__}"
-        if hasattr(self, "generator_func"):
-            string += f" with {self.generator_func.__name__} distribution"
-        else:
-            string += f" with custom distribution"
-        return string
+        return f"<RandomVariable of type <{type(self.example_sample).__name__}>>"
 
     def __repr__(self):
         return self.__str__()

@@ -15,7 +15,7 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 ## Quick guide
 
 Randify works on functions with any number and type of input and output arguments.
-In this his quick example we have a function `y1, x2 = f(x1, x2)` returning the sum `x1 + x2` and the product `x1 * x2` of two arguments `x1` and `x2`. For more in-depth examples check-out the Jupyter-Notebooks in `examples`.
+In this quick example we have a function `y1, x2 = f(x1, x2)` returning the sum `x1 + x2` and the product `x1 * x2` of two arguments `x1` and `x2`. For more in-depth examples check-out the Jupyter-Notebooks in `examples`.
 ```
 def f(x1, x2):
     return x1 + x2, x1 * x2
@@ -53,7 +53,7 @@ plot_pdf(x1=x1, x2=x2, y1=y1, y2=y2)
 Full API documentation can be found at https://jonasnebl.github.io/randify/randify.html. The documentation is generated automatically using `pdoc`.
 ```
 $ pip install pdoc
-$ pdoc randify --math - o ./doc
+$ pdoc randify --math
 ```
 
 ## Formatting 

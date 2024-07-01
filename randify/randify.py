@@ -2,19 +2,19 @@ from .RandomVariable import RandomVariable
 from time import perf_counter
 
 
-def randify(foo, duration: float = 1, N: int = -1, verbose: bool = True):
+def randify(foo, N: int = -1, duration: float = 1, verbose: bool = True):
     """
     Decorator that takes a function foo and allows RandomVariables as input.
     Performs Monte Carlo simulation by evaluating foo on samples of the input RandomVariables.
-    :param foo: function to transform probability distributions
-    :param N: optional, number of iterations for Monte Carlo simulation.
+    :param foo: Function to evaluate.
+    :param N: Number of iterations for Monte Carlo simulation.
         Default: -1 for automatic number of iterations.
-    :param duration: optional, Approximate duration of the simulation in seconds.
+    :param duration: Approximate (very rough approximate)
+        duration of the simulation in seconds.
         Used to determine N if N=-1.
         No effect if N!=-1 or one of the RandomVariables provides samples.
-        Default: 1 second.
-    :param verbose: optional, print additional information.
-        Default: False
+
+    :param verbose: If True, information about the simulation is printed.
     :return: function that allows RandomVariables as input and returns RandomVariables as output
     """
 
@@ -76,8 +76,8 @@ def randify(foo, duration: float = 1, N: int = -1, verbose: bool = True):
             print(f"Randify: {N_samples} samples evaluated in {perf_counter() - start_total:.3f}s.")
 
         if returns_tuple:
-            return tuple(RandomVariable(samples=result_samples[i]) for i in range(N_return))
+            return tuple(RandomVariable(result_samples[i]) for i in range(N_return))
         else:
-            return RandomVariable(samples=result_samples)
+            return RandomVariable(result_samples)
 
     return inner

@@ -12,6 +12,8 @@ def _multiple_plots_loop(plot_one_plot_foo, title, plot_expected_value, **kwargs
     """
 
     N_subplots = len(kwargs)
+    if N_subplots == 0:
+        raise ValueError("No RandomVariable provided to plot as keyword argument.")
     subplots_rows = int(np.sqrt(N_subplots))
     subplots_cols = int(np.ceil(N_subplots / subplots_rows))
     counter_rows, counter_cols = 0, 0

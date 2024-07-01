@@ -59,11 +59,6 @@ class RandomVariable:
             return self
         elif not hasattr(self.example_sample, property_):
             raise ValueError(f"Property {property_} not available.")
-        elif hasattr(self, "generator_func"):
-            if callable(getattr(self.example_sample, property_)):
-                return RandomVariable(lambda: getattr(self.generator_func(), property_)())
-            else:
-                return RandomVariable(lambda: getattr(self.generator_func(), property_))
         else:
             if callable(getattr(self.example_sample, property_)):
                 return RandomVariable([getattr(sample, property_)() for sample in self._samples])

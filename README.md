@@ -7,9 +7,9 @@ Randify performs Monte Carlo simulations to estimate probability density distrib
 Full API documentation at https://jonasnebl.github.io/randify/randify.html
 
 ## Installation
-Currently randify is only available on test.pypi. Use this command to install:
+Install randify from PyPI:
 ```
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ randify
+$ pip install randify
 ```
 
 ## Quick guide

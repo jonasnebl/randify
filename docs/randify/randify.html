@@ -81,19 +81,19 @@
 </span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">perf_counter</span>
 </span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a>
 </span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a>
-</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="k">def</span> <span class="nf">randify</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="k">def</span> <span class="nf">randify</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 </span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="sd">    Decorator that takes a function foo and allows RandomVariables as input.</span>
 </span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="sd">    Performs Monte Carlo simulation by evaluating foo on samples of the input RandomVariables.</span>
-</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="sd">    :param foo: function to transform probability distributions</span>
-</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">    :param N: optional, number of iterations for Monte Carlo simulation.</span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="sd">    :param foo: Function to evaluate.</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">    :param N: Number of iterations for Monte Carlo simulation.</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="sd">        Default: -1 for automatic number of iterations.</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="sd">    :param duration: optional, Approximate duration of the simulation in seconds.</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="sd">        Used to determine N if N=-1.</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="sd">        No effect if N!=-1 or one of the RandomVariables provides samples.</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="sd">        Default: 1 second.</span>
-</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a><span class="sd">    :param verbose: optional, print additional information.</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a><span class="sd">        Default: False</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="sd">    :param duration: Approximate (very rough approximate)</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="sd">        duration of the simulation in seconds.</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="sd">        Used to determine N if N=-1.</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="sd">        No effect if N!=-1 or one of the RandomVariables provides samples.</span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a><span class="sd">    :param verbose: If True, information about the simulation is printed.</span>
 </span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="sd">    :return: function that allows RandomVariables as input and returns RandomVariables as output</span>
 </span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>
@@ -155,9 +155,9 @@
 </span><span id="L-76"><a href="#L-76"><span class="linenos">76</span></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Randify: </span><span class="si">{</span><span class="n">N_samples</span><span class="si">}</span><span class="s2"> samples evaluated in </span><span class="si">{</span><span class="n">perf_counter</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_total</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">s.&quot;</span><span class="p">)</span>
 </span><span id="L-77"><a href="#L-77"><span class="linenos">77</span></a>
 </span><span id="L-78"><a href="#L-78"><span class="linenos">78</span></a>        <span class="k">if</span> <span class="n">returns_tuple</span><span class="p">:</span>
-</span><span id="L-79"><a href="#L-79"><span class="linenos">79</span></a>            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">result_samples</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_return</span><span class="p">))</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos">79</span></a>            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">(</span><span class="n">result_samples</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_return</span><span class="p">))</span>
 </span><span id="L-80"><a href="#L-80"><span class="linenos">80</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos">81</span></a>            <span class="k">return</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">result_samples</span><span class="p">)</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos">81</span></a>            <span class="k">return</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">result_samples</span><span class="p">)</span>
 </span><span id="L-82"><a href="#L-82"><span class="linenos">82</span></a>
 </span><span id="L-83"><a href="#L-83"><span class="linenos">83</span></a>    <span class="k">return</span> <span class="n">inner</span>
 </span></pre></div>
@@ -169,25 +169,25 @@
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">randify</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">foo</span>, </span><span class="param"><span class="n">duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span>, </span><span class="param"><span class="n">N</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>, </span><span class="param"><span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></span><span class="return-annotation">):</span></span>
+        <span class="name">randify</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">foo</span>, </span><span class="param"><span class="n">N</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>, </span><span class="param"><span class="n">duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span>, </span><span class="param"><span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></span><span class="return-annotation">):</span></span>
 
                 <label class="view-source-button" for="randify-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#randify"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="randify-6"><a href="#randify-6"><span class="linenos"> 6</span></a><span class="k">def</span> <span class="nf">randify</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="randify-6"><a href="#randify-6"><span class="linenos"> 6</span></a><span class="k">def</span> <span class="nf">randify</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 </span><span id="randify-7"><a href="#randify-7"><span class="linenos"> 7</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="randify-8"><a href="#randify-8"><span class="linenos"> 8</span></a><span class="sd">    Decorator that takes a function foo and allows RandomVariables as input.</span>
 </span><span id="randify-9"><a href="#randify-9"><span class="linenos"> 9</span></a><span class="sd">    Performs Monte Carlo simulation by evaluating foo on samples of the input RandomVariables.</span>
-</span><span id="randify-10"><a href="#randify-10"><span class="linenos">10</span></a><span class="sd">    :param foo: function to transform probability distributions</span>
-</span><span id="randify-11"><a href="#randify-11"><span class="linenos">11</span></a><span class="sd">    :param N: optional, number of iterations for Monte Carlo simulation.</span>
+</span><span id="randify-10"><a href="#randify-10"><span class="linenos">10</span></a><span class="sd">    :param foo: Function to evaluate.</span>
+</span><span id="randify-11"><a href="#randify-11"><span class="linenos">11</span></a><span class="sd">    :param N: Number of iterations for Monte Carlo simulation.</span>
 </span><span id="randify-12"><a href="#randify-12"><span class="linenos">12</span></a><span class="sd">        Default: -1 for automatic number of iterations.</span>
-</span><span id="randify-13"><a href="#randify-13"><span class="linenos">13</span></a><span class="sd">    :param duration: optional, Approximate duration of the simulation in seconds.</span>
-</span><span id="randify-14"><a href="#randify-14"><span class="linenos">14</span></a><span class="sd">        Used to determine N if N=-1.</span>
-</span><span id="randify-15"><a href="#randify-15"><span class="linenos">15</span></a><span class="sd">        No effect if N!=-1 or one of the RandomVariables provides samples.</span>
-</span><span id="randify-16"><a href="#randify-16"><span class="linenos">16</span></a><span class="sd">        Default: 1 second.</span>
-</span><span id="randify-17"><a href="#randify-17"><span class="linenos">17</span></a><span class="sd">    :param verbose: optional, print additional information.</span>
-</span><span id="randify-18"><a href="#randify-18"><span class="linenos">18</span></a><span class="sd">        Default: False</span>
+</span><span id="randify-13"><a href="#randify-13"><span class="linenos">13</span></a><span class="sd">    :param duration: Approximate (very rough approximate)</span>
+</span><span id="randify-14"><a href="#randify-14"><span class="linenos">14</span></a><span class="sd">        duration of the simulation in seconds.</span>
+</span><span id="randify-15"><a href="#randify-15"><span class="linenos">15</span></a><span class="sd">        Used to determine N if N=-1.</span>
+</span><span id="randify-16"><a href="#randify-16"><span class="linenos">16</span></a><span class="sd">        No effect if N!=-1 or one of the RandomVariables provides samples.</span>
+</span><span id="randify-17"><a href="#randify-17"><span class="linenos">17</span></a>
+</span><span id="randify-18"><a href="#randify-18"><span class="linenos">18</span></a><span class="sd">    :param verbose: If True, information about the simulation is printed.</span>
 </span><span id="randify-19"><a href="#randify-19"><span class="linenos">19</span></a><span class="sd">    :return: function that allows RandomVariables as input and returns RandomVariables as output</span>
 </span><span id="randify-20"><a href="#randify-20"><span class="linenos">20</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="randify-21"><a href="#randify-21"><span class="linenos">21</span></a>
@@ -249,9 +249,9 @@
 </span><span id="randify-77"><a href="#randify-77"><span class="linenos">77</span></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Randify: </span><span class="si">{</span><span class="n">N_samples</span><span class="si">}</span><span class="s2"> samples evaluated in </span><span class="si">{</span><span class="n">perf_counter</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_total</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">s.&quot;</span><span class="p">)</span>
 </span><span id="randify-78"><a href="#randify-78"><span class="linenos">78</span></a>
 </span><span id="randify-79"><a href="#randify-79"><span class="linenos">79</span></a>        <span class="k">if</span> <span class="n">returns_tuple</span><span class="p">:</span>
-</span><span id="randify-80"><a href="#randify-80"><span class="linenos">80</span></a>            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">result_samples</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_return</span><span class="p">))</span>
+</span><span id="randify-80"><a href="#randify-80"><span class="linenos">80</span></a>            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">RandomVariable</span><span class="p">(</span><span class="n">result_samples</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_return</span><span class="p">))</span>
 </span><span id="randify-81"><a href="#randify-81"><span class="linenos">81</span></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="randify-82"><a href="#randify-82"><span class="linenos">82</span></a>            <span class="k">return</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">result_samples</span><span class="p">)</span>
+</span><span id="randify-82"><a href="#randify-82"><span class="linenos">82</span></a>            <span class="k">return</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">result_samples</span><span class="p">)</span>
 </span><span id="randify-83"><a href="#randify-83"><span class="linenos">83</span></a>
 </span><span id="randify-84"><a href="#randify-84"><span class="linenos">84</span></a>    <span class="k">return</span> <span class="n">inner</span>
 </span></pre></div>
@@ -263,15 +263,14 @@ Performs Monte Carlo simulation by evaluating foo on samples of the input Random
 <h6 id="parameters">Parameters</h6>
 
 <ul>
-<li><strong>foo</strong>:  function to transform probability distributions</li>
-<li><strong>N</strong>:  optional, number of iterations for Monte Carlo simulation.
+<li><strong>foo</strong>:  Function to evaluate.</li>
+<li><strong>N</strong>:  Number of iterations for Monte Carlo simulation.
 Default: -1 for automatic number of iterations.</li>
-<li><strong>duration</strong>:  optional, Approximate duration of the simulation in seconds.
+<li><p><strong>duration</strong>:  Approximate (very rough approximate)
+duration of the simulation in seconds.
 Used to determine N if N=-1.
-No effect if N!=-1 or one of the RandomVariables provides samples.
-Default: 1 second.</li>
-<li><strong>verbose</strong>:  optional, print additional information.
-Default: False</li>
+No effect if N!=-1 or one of the RandomVariables provides samples.</p></li>
+<li><p><strong>verbose</strong>:  If True, information about the simulation is printed.</p></li>
 </ul>
 
 <h6 id="returns">Returns</h6>

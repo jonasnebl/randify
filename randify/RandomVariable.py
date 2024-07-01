@@ -61,22 +61,14 @@ class RandomVariable:
             raise ValueError(f"Property {property_} not available.")
         elif hasattr(self, "generator_func"):
             if callable(getattr(self.example_sample, property_)):
-                return RandomVariable(
-                    lambda: getattr(self.generator_func(), property_)()
-                )
+                return RandomVariable(lambda: getattr(self.generator_func(), property_)())
             else:
-                return RandomVariable(
-                    lambda: getattr(self.generator_func(), property_)
-                )
+                return RandomVariable(lambda: getattr(self.generator_func(), property_))
         else:
             if callable(getattr(self.example_sample, property_)):
-                return RandomVariable(
-                    [getattr(sample, property_)() for sample in self._samples]
-                )
+                return RandomVariable([getattr(sample, property_)() for sample in self._samples])
             else:
-                return RandomVariable(
-                    [getattr(sample, property_) for sample in self._samples]
-                )
+                return RandomVariable([getattr(sample, property_) for sample in self._samples])
 
     def __getitem__(self, key):
         """
@@ -115,12 +107,12 @@ class RandomVariable:
         :return: list of N samples of the RandomVariable.
         """
         if len(self._samples) == N:
-            pass
+            return self._samples
+
         elif len(self._samples) < N and hasattr(self, "generator_func"):
             # new samples from generator function
-            self._samples += self._return_N_new_samples_from_generator_func(
-                    N - len(self._samples)
-            )
+            self._samples += self._return_N_new_samples_from_generator_func(N - len(self._samples))
+
             # delete cached properties based on samples
             # because more samples are available for more accurate statistical measures
             if hasattr(self, "expected_value"):
@@ -131,11 +123,17 @@ class RandomVariable:
                 del self.skewness
             if hasattr(self, "kurtosis"):
                 del self.kurtosis
-        else:
+
+            return self._samples
+
+        elif len(self._samples) > N:
+            selected_indices = np.random.choice(len(self._samples), size=N, replace=True)
+            return [self._samples[i] for i in selected_indices]  # don't reduce number of samples
+
+        elif len(self._samples) < N:
             selected_indices = np.random.choice(len(self._samples), size=N, replace=True)
             self._samples = [self._samples[i] for i in selected_indices]
-        
-        return self._samples
+            return self._samples
 
     def _return_N_new_samples_from_generator_func(self, N: int):
         """
